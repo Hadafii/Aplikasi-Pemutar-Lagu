@@ -485,6 +485,42 @@ void deleteLastRelation(ListRelation &LR, adr_relation &P)
         }
     }
 }
+
+void deleteRelationByTitle(listPlaylist &LP, ListRelation &LR, string playlist, adr_relation &P)
+{
+    string judul;
+    if (isEmptyRelation(LR))
+    {
+        cout << "Maaf Tidak Ada Relasi Lagu yang Dapat Dihapus\n";
+    }
+    else
+    {
+        showIsiPlaylist(LP, playlist);
+        cout << "Masukkan Judul Lagu yang Ingin Dihapus dari Playlist: ";
+        getline(cin, judul);
+        P = searchRelation(LP, judul, playlist);
+        while (P == NULL)
+        {
+            cout << "Judul Yang Anda Masukan Tidak Ada!\n";
+            cout << "Masukkan Judul Lagu yang Ingin Dihapus dari Playlist: ";
+            getline(cin, judul);
+            P = searchRelation(LP, judul, playlist);
+        }
+        if (P == first(LR))
+        {
+            deleteFirstRelation(LR, P);
+        }
+        else if (P == last(LR))
+        {
+            deleteLastRelation(LR, P);
+        }
+        else
+        {
+            deleteAfterRelation(LR, prev(P), P);
+        }
+    }
+}
+
 void showPlaylist(listPlaylist LP)
 {
     adr_playlist P = first(LP);
@@ -498,7 +534,7 @@ void showPlaylist(listPlaylist LP)
         cout << "Jumlah Playlist " << jumlahPlaylist(LP) << endl;
         while (P != NULL)
         {
-            cout << "-----\t" << i << " -----\n";
+            cout << "-----\t" << i << "\t-----\n";
             cout << "Nama Playlist :" << info(P).namaPlaylist << endl;
             cout << "Creator       :" << info(P).creator << endl;
             cout << "Likes         :" << info(P).likes << endl;
@@ -564,16 +600,6 @@ void showAntrianLagu(ListQueue LQ)
         }
     }
 }
-/*
-    cout << "=======================================================================================" << endl;
-    cout << setw(7) << left << "No" << setw(26) << left << "Judul" << setw(16) << left << "Artist" << setw(15) << left << "Durasi" << setw(15) << left << "Album" << endl;
-    cout << "=======================================================================================" << endl;
-    while (L != NULL)
-    {
-        if (info(L).artist == namaArtist)
-        {
-            cout << setw(5) << left << i << setw(28) << left << info(L).judul << setw(17) << left << info(L).artist << setw(12) << left << info(L).durasi << setw(25) << left << info(L).album << endl;
-*/
 
 void showIsiPlaylist(listPlaylist LP, string Nama_Playlist)
 {
@@ -586,7 +612,7 @@ void showIsiPlaylist(listPlaylist LP, string Nama_Playlist)
         R = lagu(P).first;
         if (R == NULL)
         {
-            cout << "Nama Playlist Berhasil Ditemukan, Tetapi Playlist Kosong\n";
+            cout << "Nama Playlist Berhasil Ditemukan, Tetapi Playlist Memiliki " << jumlahLaguPL(LP, Nama_Playlist) << " lagu\n";
         }
         else
         {
@@ -622,7 +648,6 @@ void showRelasiLagu(listPlaylist LP, string judul_lagu)
     adr_relation R;
     bool ketemu = false;
     int i = 1;
-    cout << "Lagu yang dicari berada di: \n";
     if (P == NULL)
     {
         cout << "Maaf Playlist Kosong\n";
@@ -634,7 +659,11 @@ void showRelasiLagu(listPlaylist LP, string judul_lagu)
         {
             if (R->dataLagu->info.judul == judul_lagu)
             {
-                cout << i << ". Nama Playlist  :" << info(P).namaPlaylist << endl;
+                if (i == 1)
+                {
+                    cout << "Lagu yang dicari berada di: \n";
+                }
+                cout << i << ". Nama Playlist  : " << info(P).namaPlaylist << endl;
                 ketemu = true;
                 i++;
             }
@@ -656,15 +685,19 @@ void showLaguByArtist(listLagu LL, string namaArtist)
     adr_lagu L = first(LL);
     bool ketemu = false;
     int i = 0;
-    cout << "List lagu berdasarkan artist yang dicari:\n";
-    cout << "=======================================================================================" << endl;
-    cout << setw(7) << left << "No" << setw(26) << left << "Judul" << setw(16) << left << "Artist" << setw(15) << left << "Durasi" << setw(15) << left << "Album" << endl;
-    cout << "=======================================================================================" << endl;
+
     while (L != NULL)
     {
         if (info(L).artist == namaArtist)
         {
             i++;
+            if (i == 1)
+            {
+                cout << "List lagu berdasarkan artist yang dicari:\n";
+                cout << "=======================================================================================" << endl;
+                cout << setw(7) << left << "No" << setw(26) << left << "Judul" << setw(16) << left << "Artist" << setw(15) << left << "Durasi" << setw(15) << left << "Album" << endl;
+                cout << "=======================================================================================" << endl;
+            }
             cout << setw(5) << left << i << setw(28) << left << info(L).judul << setw(17) << left << info(L).artist << setw(12) << left << info(L).durasi << setw(25) << left << info(L).album << endl;
             ketemu = true;
         }
@@ -721,6 +754,54 @@ void showSameTitle(listLagu LL, string judul_lagu)
     }
 }
 
+void showSameCreator(listPlaylist LP, string creatorName)
+{
+    int jumlah = 0;
+    int i = 0;
+    adr_playlist cek = first(LP);
+    adr_playlist P = first(LP);
+    while (cek != NULL)
+    {
+        if (cek->info.creator == creatorName)
+        {
+            jumlah++;
+        }
+        cek = cek->next;
+    }
+
+    if (jumlah >= 2)
+    {
+        while (P != NULL)
+        {
+            if (P->info.creator == creatorName)
+            {
+                i++;
+                if (i == 1)
+                {
+                    cout << creatorName << " Merupakan " << jumlah << " Creator Playlist:\n";
+                    cout << i << ". " << P->info.namaPlaylist << endl;
+                }
+                else
+                {
+                    cout << i << ". " << P->info.namaPlaylist << endl;
+                }
+            }
+            P = P->next;
+        }
+    }
+    else
+    {
+        if (jumlah == 1)
+        {
+            cout << "Maaf Creator Hanya Memiliki 1 Playlist atau Tidak Ada yang Sama\n";
+        }
+        if (jumlah == 0)
+        {
+            cout << "Maaf Playlist dengan Creator yang Sama Tidak Ditemukan\n";
+        }
+    }
+}
+
 int jumlahPlaylist(listPlaylist LP)
 {
     adr_playlist P = first(LP);
@@ -767,8 +848,8 @@ int jumlahLaguPL(listPlaylist LP, string Nama_Playlist)
 {
     int jumlah = 0;
     adr_relation R;
-    adr_playlist P = first(LP);
-    if (info(P).namaPlaylist == Nama_Playlist)
+    adr_playlist P = searchPlaylist(LP, Nama_Playlist);
+    if (P != NULL)
     {
 
         R = lagu(P).first;
@@ -854,7 +935,7 @@ void menuInput(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &LQ)
     cout << "1. Input Playlist\n";
     cout << "2. Input Lagu\n";
     cout << "3. Input Relasi\n";
-    cout << "4. Input Like\n";
+    cout << "4. Input Like Playlist\n";
     cout << "0. Kembali\n";
     cout << "Pilihan: ";
     cin >> pilihan;
@@ -904,6 +985,7 @@ void inputPlaylist(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &
         getline(cin, X.creator);
         X.likes = 0;
         X.jumlahLagu = 0;
+
         adr_playlist P = createElemenLP(X);
         do
         {
@@ -932,18 +1014,19 @@ void inputPlaylist(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &
                 }
                 else
                 {
+                    showPlaylist(LP);
                     cout << "Masukkan nama playlist sebelumnya: ";
 
                     getline(cin, playlistBefore);
-
-                    while (Prec != NULL)
+                    Prec = searchPlaylist(LP, playlistBefore);
+                    if (Prec == NULL)
                     {
-                        if (info(Prec).namaPlaylist == playlistBefore)
-                        {
-                            insertAfterPlaylist(LP, Prec, P);
-                            cout << "Playlist Telah Dimasukkan!\n";
-                        }
-                        Prec = next(Prec);
+                        cout << "Nama playlist tidak ditemukan!\n";
+                    }
+                    else
+                    {
+                        insertAfterPlaylist(LP, Prec, P);
+                        cout << "Playlist Telah Dimasukkan!\n";
                     }
                     menuInput(LP, LL, LR, LQ);
                 }
@@ -970,6 +1053,7 @@ void inputPlaylist(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &
     {
         cout << "Maaf Nama Playlist Sudah Ada\n";
         cout << "Silahkan Input Nama Playlist Baru atau Kembali Ke Menu Utama\n";
+        cout << "============================================================\n";
         do
         {
             cout << "Pilih Menu: \n";
@@ -1150,6 +1234,8 @@ void inputRelasi(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &LQ
                         if (isEmptyRelation(P->lagu))
                         {
                             cout << "Gagal! Tidak ada data untuk dilakukan operasi ini.\n";
+                            cout << "==================================================\n";
+                            pilihan = 99;
                         }
                         else
                         {
@@ -1159,8 +1245,9 @@ void inputRelasi(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &LQ
                             Prec = searchRelation(LP, judulLagu, namaPlaylist);
                             insertAfterRelation(lagu(P), prev(Prec), R);
                             cout << "Lagu telah ditambahkan ke playlist!.\n";
+                            menuInput(LP, LL, LR, LQ);
                         }
-                        menuInput(LP, LL, LR, LQ);
+
                         break;
                     case 3:
 
@@ -1541,6 +1628,7 @@ void menuDeleteLagu(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue 
             {
                 cout << "Judul Lagu tidak ditemukan.\n";
             }
+            menuDelete(LP, LL, LR, LQ);
             break;
         }
         case 0:
@@ -1557,7 +1645,7 @@ void menuDeleteLagu(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue 
 }
 void menuDeleteRelasi(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &LQ)
 {
-    string namaPlaylist, judulLaguBefore;
+    string namaPlaylist, judulLaguBefore, judulLagu, confirm;
     int pilihan, pilihan2;
     adr_relation R, Prec;
     adr_lagu laguBefore;
@@ -1584,6 +1672,8 @@ void menuDeleteRelasi(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueu
                 cout << "1. Delete First Relasi Playlist\n";
                 cout << "2. Delete After Relasi Playlist\n";
                 cout << "3. Delete Last Relasi Playlist\n";
+                cout << "4. Delete Relasi Sesuai Judul Lagu\n";
+                cout << "0. Kembali ke Menu Delete\n";
                 cout << "Pilihan: ";
                 cin >> pilihan;
                 cin.ignore();
@@ -1646,17 +1736,26 @@ void menuDeleteRelasi(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueu
                     cout << "Relasi Dihapus\n";
                     menuDelete(LP, LL, LR, LQ);
                     break;
+                case 4:
+                    deleteRelationByTitle(LP, lagu(P), namaPlaylist, R);
+                    P->info.jumlahLagu--;
+                    cout << "Relasi Dihapus\n";
+                    menuDelete(LP, LL, LR, LQ);
+                    break;
+                case 0:
+                    menuDelete(LP, LL, LR, LQ);
+                    break;
                 default:
 
                     cout << "Pilihan tidak valid.\n";
                     break;
                 }
-            } while (pilihan < 1 || pilihan > 3);
+            } while (pilihan < 0 || pilihan > 4);
         }
         else
         {
             cout << "Playlist tidak ditemukan.\n";
-            cout << "1.Ulangi\n";
+            cout << "1. Ulangi\n";
             cout << "0. Kembali\n";
             cout << "Pilihan: ";
             cin >> pilihan2;
@@ -1687,7 +1786,7 @@ void likePlaylist(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &L
     string namapl;
     cout << "= = = = = = = = MENU LIKE PLAYLIST = = = = = = = =\n";
     showPlaylist(LP);
-    cout << "Input Nama Playlist yang Ingin Diberi Likes\n";
+    cout << "Input Nama Playlist yang Ingin Diberi Likes: ";
     getline(cin, namapl);
     adr_playlist P = searchPlaylist(LP, namapl);
     if (P != NULL)
@@ -1739,6 +1838,7 @@ void menuShowData(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &L
     string Nama_Playlist;
     string penyanyi;
     string Judul_Lagu;
+    string creator;
 
     do
     {
@@ -1750,6 +1850,7 @@ void menuShowData(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &L
         cout << "5. Show Relasi Lagu\n";
         cout << "6. Show Lagu dari Penyanyi\n";
         cout << "7. Show Lagu dengan Judul yang Sama\n";
+        cout << "8. Show Playlist dengan Creator yang Sama\n";
         cout << "0. Kembali\n";
         cout << "Pilihan: ";
         cin >> pilihan;
@@ -1915,6 +2016,29 @@ void menuShowData(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &L
                 }
             } while (pilihan != 0);
             break;
+        case 8:
+            cout << "Masukkan Creator Playlist: ";
+            getline(cin, creator);
+
+            showSameCreator(LP, creator);
+            do
+            {
+                cout << "= = = = = = = = = = = = = = = =\n";
+                cout << "0. Kembali\n";
+                cout << "Pilihan: ";
+                cin >> pilihan;
+                cin.ignore();
+                switch (pilihan)
+                {
+                case 0:
+                    menuShowData(LP, LL, LR, LQ);
+                    break;
+                default:
+                    cout << "Pilihan tidak tersedia!\n";
+                    break;
+                }
+            } while (pilihan != 0);
+            break;
         case 0:
 
             menuUtama(LP, LL, LR, LQ);
@@ -1936,7 +2060,7 @@ void menuSearchPlaylist(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQu
     {
         cout << "= = = = = = = = MENU SEARCH PLAYLIST= = = = = = = =\n";
         cout << "1. Cari berdasarkan nama playlist\n";
-        cout << "2. Cari berdasarkan Creator playlist\n";
+        cout << "2. Cari berdasarkan creator playlist\n";
         cout << "0. Kembali\n";
         cout << "Pilihan: ";
         cin >> pilihan;
@@ -1988,18 +2112,27 @@ void menuSearchPlaylist(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQu
             }
             break;
         case 2:
+        {
+            adr_playlist P, search;
+            adr_relation R;
+            int i = 1;
+            int jum = 0;
 
             cout << "Masukkan nama creator playlist yang ingin dicari: ";
             getline(cin, namacreator);
 
-            P = searchPlaylistByCreator(LP, namacreator);
-            if (P == NULL)
+            P = LP.first;
+            while (P != NULL)
             {
-                cout << "Playlist tidak ditemukan untuk creator tersebut!\n";
+                if (P->info.creator == namacreator)
+                {
+                    jum++;
+                }
+                P = P->next;
             }
-            else
+            if (jum != 0)
             {
-                cout << "Playlist Ditemukan!\n";
+                cout << "\nDitemukan " << jum << " playlist dengan nama creator " << namacreator << endl;
                 do
                 {
                     cout << "= = = = = = = = = = = = = = = =\n";
@@ -2013,11 +2146,51 @@ void menuSearchPlaylist(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQu
                     case 1:
 
                         cout << setw(20) << left << "Nama Playlist" << setw(20) << left << "Creator Playlist" << setw(10) << left << "Likes" << setw(15) << left << "Jumlah Lagu" << endl;
-                        cout << setw(20) << left << info(P).namaPlaylist << setw(20) << left << info(P).creator << setw(10) << left << info(P).likes << setw(15) << left << info(P).jumlahLagu << endl;
+                        P = LP.first;
+                        while (P != NULL)
+                        {
+                            if (P->info.creator == namacreator)
+                            {
+                                cout << setw(20) << left << info(P).namaPlaylist << setw(20) << left << info(P).creator << setw(10) << left << info(P).likes << setw(15) << left << info(P).jumlahLagu << endl;
+                            }
+                            P = P->next;
+                        }
                         break;
                     case 2:
+                        P = LP.first;
+                        while (P != NULL)
+                        {
+                            if (P->info.creator == namacreator)
+                            {
+                                R = lagu(P).first;
+                                if (R == NULL)
+                                {
+                                    cout << "Nama Playlist Berhasil Ditemukan, Tetapi Playlist Memiliki " << P->info.jumlahLagu << " lagu\n";
+                                }
+                                else
+                                {
+                                    cout << endl;
+                                    cout << setw(20) << left << "Nama Playlist" << setw(20) << left << "Creator Playlist" << setw(10) << left << "Likes" << setw(15) << left << "Jumlah Lagu" << endl;
+                                    cout << setw(20) << left << info(P).namaPlaylist << setw(20) << left << info(P).creator << setw(10) << left << info(P).likes << setw(15) << left << info(P).jumlahLagu << endl;
+                                    cout << "=======================================================================================" << endl;
+                                    cout << setw(7) << left << "No" << setw(26) << left << "Judul" << setw(16) << left << "Artist" << setw(15) << left << "Durasi" << setw(15) << left << "Album" << endl;
+                                    cout << "=======================================================================================" << endl;
 
-                        showIsiPlaylist(LP, info(P).namaPlaylist);
+                                    while (R != lagu(P).last)
+                                    {
+                                        cout << setw(5) << left << i << setw(25) << left << R->dataLagu->info.judul << setw(20) << left << R->dataLagu->info.artist << setw(10) << left << R->dataLagu->info.durasi << setw(20) << left << R->dataLagu->info.album << endl;
+                                        cout << "---------------------------------------------------------------------------------------" << endl;
+                                        R = next(R);
+                                        i++;
+                                    }
+                                    if (R == lagu(P).last)
+                                    {
+                                        cout << setw(5) << left << i << setw(25) << left << R->dataLagu->info.judul << setw(20) << left << R->dataLagu->info.artist << setw(10) << left << R->dataLagu->info.durasi << setw(20) << left << R->dataLagu->info.album << endl;
+                                    }
+                                }
+                            }
+                            P = P->next;
+                        }
                         break;
                     default:
 
@@ -2026,7 +2199,11 @@ void menuSearchPlaylist(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQu
                     }
                 } while (pilihan2 < 1 || pilihan2 > 2);
             }
-            break;
+            else
+            {
+                cout << "Playlist tidak ditemukan untuk creator tersebut!\n";
+            }
+        }
         case 0:
 
             menuSearch(LP, LL, LR, LQ);
@@ -2235,7 +2412,7 @@ void menuQueue(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &LQ)
 {
     int pilihan;
 
-    cout << "= = = = = = = = MENU QUEUE= = = = = = = =\n";
+    cout << "= = = = = = = = MENU QUEUE = = = = = = = =\n";
     cout << "1. Tambah Antrian\n";
     cout << "2. Hapus Antrian\n";
     cout << "3. Tampilkan Antrian\n";
@@ -2303,44 +2480,141 @@ void menuTampilkanQueue(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQu
 }
 void playSongs(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &LQ)
 {
-    showAntrianLagu(LQ);
+
     adr_Queue Q;
+    int pilihan, N;
+
     if (isEmptyQueue(LQ))
     {
         cout << "Maaf Antrian Kosong, Tidak Ada yang Bisa di Play\n";
     }
     else
     {
-        string stop = "Y";
-        while (!isEmptyQueue(LQ) && (stop == "Y" || stop == "y"))
+        showAntrianLagu(LQ);
+        do
         {
-            dequeue(LQ, Q);
-            cout << "= = = = = = = = MEMUTAR LAGU = = = = = = = =\n";
-            showAntrianLagu(LQ);
-            cout << "====================================== NOW PLAYING ======================================\n";
-            cout << "|| " << setw(84) << left << info(Q).judul << "||" << endl;
-            cout << "|| " << setw(84) << left << info(Q).artist << "||" << endl;
-            cout << "||                        ------------------>-------------------  " << setw(21) << left << info(Q).durasi << "||" << endl;
-            cout << "=========================================================================================\n";
-            cout << "Apakah Akan Lanjut Play Lagu? (Y/N)\n";
-            cin >> stop;
+
+            cout << "= = = = = = = = MENU PLAY LAGU = = = = = = = =\n";
+            cout << "1. Play All Song in Queue\n";
+            cout << "2. Play N Song in Queue\n";
+            cout << "3. Play Manual\n";
+            cout << "0. Kembali\n";
+            cout << "Pilihan: ";
+            cin >> pilihan;
             cin.ignore();
-        }
-        if (stop == "N" || stop == "n")
-        {
-            if (!isEmptyQueue(LQ))
+            switch (pilihan)
             {
-                cout << "Lagu yang Tersisa pada Antrian:\n";
-                showAntrianLagu(LQ);
-            }
-        }
-        else
-        {
-            if (isEmptyQueue(LQ))
+
+            case 1:
+                while (!isEmptyQueue(LQ))
+                {
+                    dequeue(LQ, Q);
+                    cout << endl;
+                    showAntrianLagu(LQ);
+                    cout << "====================================== NOW PLAYING ======================================\n";
+                    cout << "|| " << setw(84) << left << info(Q).judul << "||" << endl;
+                    cout << "|| " << setw(84) << left << info(Q).artist << "||" << endl;
+                    cout << "||                        ------------------>-------------------  " << setw(21) << left << info(Q).durasi << "||" << endl;
+                    cout << "=========================================================================================\n";
+                    Sleep(2000);
+                }
+                break;
+            case 2:
+                if (isEmptyQueue(LQ))
+                {
+                    cout << "Maaf Antrian Kosong, Tidak Ada yang Bisa di Play\n";
+                }
+                else
+                {
+                    cout << "Jumlah Lagu Pada Antrian adalah " << jumlahAntrian(LQ) << endl;
+                    cout << "Input Berapa Banyak Lagu yang Ingin di Play: ";
+                    cin >> N;
+                    cin.ignore();
+                    if (N > jumlahAntrian(LQ))
+                    {
+                        cout << "Maaf Jumlah Lagu yang Ingin di Play Lebih Dari Antrian yang Ada\n";
+                    }
+                    else
+                    {
+                        for (int i = 1; i <= N; i++)
+                        {
+                            dequeue(LQ, Q);
+                            cout << endl;
+                            showAntrianLagu(LQ);
+                            cout << "====================================== NOW PLAYING ======================================\n";
+                            cout << "|| " << setw(84) << left << info(Q).judul << "||" << endl;
+                            cout << "|| " << setw(84) << left << info(Q).artist << "||" << endl;
+                            cout << "||                        ------------------>-------------------  " << setw(21) << left << info(Q).durasi << "||" << endl;
+                            cout << "=========================================================================================\n";
+                            Sleep(2000);
+                        }
+                        cout << "Jumlah Lagu yang Tersisa Pada Antrian adalah " << jumlahAntrian(LQ) << endl;
+                    }
+                }
+                break;
+            case 3:
             {
-                cout << "Maaf Antrian Kosong, Tidak Ada yang Bisa di Play\n";
+                string stop = "Y";
+                while (!isEmptyQueue(LQ) && (stop == "Y" || stop == "y"))
+                {
+                    dequeue(LQ, Q);
+                    cout << endl;
+                    showAntrianLagu(LQ);
+                    cout << "====================================== NOW PLAYING ======================================\n";
+                    cout << "|| " << setw(84) << left << info(Q).judul << "||" << endl;
+                    cout << "|| " << setw(84) << left << info(Q).artist << "||" << endl;
+                    cout << "||                        ------------------>-------------------  " << setw(21) << left << info(Q).durasi << "||" << endl;
+                    cout << "=========================================================================================\n";
+                    cout << "Apakah Akan Lanjut Play Lagu? (Y/N)\n";
+                    cin >> stop;
+                    cin.ignore();
+                }
+                if (stop == "N" || stop == "n")
+                {
+                    if (!isEmptyQueue(LQ))
+                    {
+                        cout << "Lagu yang Tersisa pada Antrian:\n";
+                        showAntrianLagu(LQ);
+                    }
+                }
+                else
+                {
+                    if (isEmptyQueue(LQ))
+                    {
+                        cout << "Maaf Antrian Kosong, Tidak Ada yang Bisa di Play\n";
+                    }
+                }
             }
-        }
+            break;
+            default:
+                cout << "Pilihan Tidak Tersedia!\n";
+                break;
+            }
+        } while (pilihan < 0 || pilihan > 3);
+        do
+        {
+            cout << "= = = = = = = = = = = = = = = =\n";
+            cout << "0. Kembali\n";
+            cout << "1. Kembali ke Menu Utama\n";
+            cout << "Pilihan: ";
+            cin >> pilihan;
+            cin.ignore();
+            if (pilihan == 0)
+            {
+
+                menuQueue(LP, LL, LR, LQ);
+            }
+            else if (pilihan == 1)
+            {
+
+                menuUtama(LP, LL, LR, LQ);
+            }
+            else
+            {
+
+                cout << "Pilihan tidak valid!\n";
+            }
+        } while (pilihan < 0 || pilihan > 1);
     }
 }
 
@@ -2406,13 +2680,21 @@ void songToQueue(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &LQ
         cin.ignore();
         for (i; i <= jumlah; i++)
         {
-            cout << "Input Judul Lagu Yang Ingin Diinputkan Dalam Antrian: ";
+            cout << "Input Judul Lagu ke-" << i << " Yang Ingin Diinputkan Dalam Antrian: ";
             getline(cin, Judul_Lagu);
             cout << "Masukkan penyanyi dari lagu tersebut: ";
             getline(cin, penyanyi);
 
             adr_lagu P = searchLagu(LL, Judul_Lagu, penyanyi);
-            enqueue(LQ, createElemenLQ(P->info));
+            if (P == NULL)
+            {
+                cout << "Lagu Tidak ditemukan dalam List!\n";
+                i--;
+            }
+            else
+            {
+                enqueue(LQ, createElemenLQ(P->info));
+            }
         }
         cout << "Isi Antrian Lagu Setelah Memasukkan Lagu Baru\n";
         showAntrianLagu(LQ);
@@ -2434,7 +2716,7 @@ void clearQueue(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &LQ)
         adr_Queue P, tanda;
         bool ketemu = false;
         int access;
-        string Judul_Lagu;
+        string Judul_Lagu, penyanyi;
         cout << "= = = = = = = = MENU DELETE QUEUE = = = = = = = =\n";
         cout << "1. Delete 1 Lagu\n";
         cout << "2. Delete Semua Antrian\n";
@@ -2449,6 +2731,8 @@ void clearQueue(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &LQ)
             createListQueue(Q2);
             cout << "Masukkan Judul Lagu yang ingin dihapus dari antrian: ";
             getline(cin, Judul_Lagu);
+            cout << "Masukkan Penyanyi dari Lagu Tersebut: ";
+            getline(cin, penyanyi);
 
             if (isEmptyQueue(LQ))
             {
@@ -2458,18 +2742,30 @@ void clearQueue(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &LQ)
             {
                 while (!isEmptyQueue(LQ))
                 {
-                    dequeue(LQ, P);
-                    if (P->info.judul != Judul_Lagu)
+                    if (LQ.head->info.artist == penyanyi && LQ.head->info.judul == Judul_Lagu)
                     {
+                        dequeue(LQ, P);
+                        ketemu = true;
+                    }
+                    else
+                    {
+                        dequeue(LQ, P);
                         enqueue(Q2, P);
                     }
+                }
+                if (ketemu)
+                {
+                    cout << "Judul Lagu berhasil dihapus dari antrian.\n";
+                }
+                else
+                {
+                    cout << "Judul Lagu tidak ditemukan dalam antrian.\n";
                 }
                 while (!isEmptyQueue(Q2))
                 {
                     dequeue(Q2, P);
                     enqueue(LQ, P);
                 }
-                cout << "Lagu Berhasil Dihapus\n";
             }
             break;
 
@@ -2499,57 +2795,65 @@ void clearQueue(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &LQ)
 }
 void changePriority(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &LQ)
 {
-    string judulLagu;
-    adr_Queue depan = head(LQ);
-    adr_Queue belakang = tail(LQ);
-    adr_Queue R, P;
-
+    ListQueue Q2;
+    createListQueue(Q2);
+    string judul_lagu, penyanyi;
+    adr_Queue prior, p;
+    bool ketemu = false;
     if (!isEmptyQueue(LQ))
     {
         showAntrianLagu(LQ);
         cout << "= = = = = = = = MENU UBAH PRIORITAS ANTRIAN = = = = = = = =\n";
         cout << "Masukan judul lagu yang ingin didahulukan: ";
-        getline(cin, judulLagu);
+        getline(cin, judul_lagu);
+        cout << "Masukan penyanyi dari lagu tersebut: ";
+        getline(cin, penyanyi);
 
-        bool ketemu;
-        while (info(head(LQ)).judul != judulLagu && head(LQ) != belakang)
+        while (!isEmptyQueue(LQ))
         {
-            dequeue(LQ, P);
-            enqueue(LQ, P);
-        }
-        if (info(head(LQ)).judul == judulLagu)
-        {
-            dequeue(LQ, R);
-            ketemu = true;
-            while (head(LQ) != depan)
+            if (LQ.head->info.artist == penyanyi && LQ.head->info.judul == judul_lagu)
             {
-                dequeue(LQ, P);
-                enqueue(LQ, P);
+                dequeue(LQ, prior);
+                ketemu = true;
             }
-            enqueue(LQ, R);
-            while (info(head(LQ)).judul != judulLagu)
+            else
             {
-                dequeue(LQ, P);
-                enqueue(LQ, P);
+                dequeue(LQ, p);
+                enqueue(Q2, p);
             }
-            cout << "Antrian berhasil diubah!\n";
         }
-        if (!ketemu)
+        if (ketemu)
         {
-            cout << "Lagu yang anda cari tidak ketemu!\n";
+            cout << "Lagu Ditemukan dan akan di Prioritaskan!\n";
+            enqueue(LQ, prior);
+            while (!isEmptyQueue(Q2))
+            {
+                dequeue(Q2, p);
+                enqueue(LQ, p);
+            }
+            cout << "Lsit Lagu Setelah Di Ubah:\n";
+            showAntrianLagu(LQ);
+        }
+        else
+        {
+            while (!isEmptyQueue(Q2))
+            {
+                dequeue(Q2, p);
+                enqueue(LQ, p);
+            }
+            cout << "Judul atau Penyanyi tidak ditemukan.\n";
         }
     }
     else
     {
-        cout << "Maaf Antrian masih kosong! \n";
+        cout << "Maaf Antrian Lagu Kosong\n";
     }
 }
-
 void menuUbah(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &LQ)
 {
     int access;
 
-    cout << "= = = = = = = = MENU UBAH QUEUE = = = = = = = =\n";
+    cout << "= = = = = = = = MENU UBAH DATA = = = = = = = =\n";
     cout << "1. Ubah Info Playlist\n";
     cout << "2. Ubah Info Lagu\n";
     cout << "3. Ubah Isi Playlist\n";
@@ -2591,7 +2895,7 @@ void ubahPlaylist(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &L
     showPlaylist(LP);
     string namaBaru, namaLama;
     int i, jumlah;
-    cout << "Input Berapa Banyak Playlist yang Ingin Diiubah Namanya:\n";
+    cout << "Input Berapa Banyak Playlist yang Ingin Diiubah Namanya: ";
     cin >> jumlah;
     cin.ignore();
     for (i = 1; i <= jumlah; i++)
@@ -2702,7 +3006,8 @@ void ubahRelasi(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &LQ)
                 while (!selesai)
                 {
                     showListLagu(LL);
-                    cout << "Masukkan data lagu baru dengan menuliskan judul lagunya:\n";
+                    cout << "=========================================================================================\n";
+                    cout << "Masukkan data lagu baru dengan menuliskan judul lagunya: ";
                     getline(cin, judulBaru);
                     cout << "Masukkan penyanyi dari lagu tersebut: ";
                     getline(cin, penyanyi);
@@ -2732,7 +3037,7 @@ void DeveloperMode(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &
 {
     infotype_lagu x;
     infotype_playlist Y;
-    adr_playlist p1, p2, p3, p4;
+    adr_playlist p1, p2, p3, p4, p5;
     adr_lagu L;
 
     x = {"Light Switch", "Charlie Puth", "3:07", "CHARLIE"};
@@ -2783,7 +3088,7 @@ void DeveloperMode(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &
     insertLastLagu(LL, createElemenLL(x));
     x = {"Cupid - Twin Ver.", "FIFTY FIFTY", "2:54", "The Begining Cupid"};
     insertLastLagu(LL, createElemenLL(x));
-    x = {"There's Nothing Holdin' Me Back", "Shawn Mendes", "3:19", "Illuminate (Deluxe)"};
+    x = {"Nothing Holdin me back", "Shawn Mendes", "3:19", "Illuminate (Deluxe)"};
     insertLastLagu(LL, createElemenLL(x));
     x = {"Beside You", "keshi", "2:46", "beside you"};
     insertLastLagu(LL, createElemenLL(x));
@@ -2794,18 +3099,42 @@ void DeveloperMode(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &
     x = {"Daylight", "Maroon 5", "3:45", "Overexposed"};
     insertLastLagu(LL, createElemenLL(x));
 
+    x = {"10,000 Hours", "Justin Bieber", "2:48", "10,000 Hours"};
+    insertLastLagu(LL, createElemenLL(x));
+    x = {"Best Part", "Daniel Caesar", "3:29", "H.E.R."};
+    insertLastLagu(LL, createElemenLL(x));
+    x = {"Die For You", "The Weekend", "3:53", "Die For You"};
+    insertLastLagu(LL, createElemenLL(x));
+    x = {"Starboy", "The Weekend", "3:50", "Starboy"};
+    insertLastLagu(LL, createElemenLL(x));
+    x = {"24/7", "Celina Sharma", "3:04", "CECE"};
+    insertLastLagu(LL, createElemenLL(x));
+    x = {"Enchanted", "Taylor Swift", "5:52", "Speak Now"};
+    insertLastLagu(LL, createElemenLL(x));
+    x = {"Make You Mine", "PUBLIC", "3:53", "Make You Mine"};
+    insertLastLagu(LL, createElemenLL(x));
+    x = {"Love Story", "Taylor Swift", "3:56", "Taylor Swift"};
+    insertLastLagu(LL, createElemenLL(x));
+    x = {"Steal The Show", "Lauv", "3:12", "Steal The Show"};
+    insertLastLagu(LL, createElemenLL(x));
+    x = {"I Love You 3000", "Stephanie Poetri", "3:30", "I Love You 3000"};
+    insertLastLagu(LL, createElemenLL(x));
+
     Y = {"Kaka Dede", "RCCA & DAFII"};
     p1 = createElemenLP(Y);
     insertLastPlaylist(LP, p1);
-    Y = {"POPMIX", "Spotipis"};
+    Y = {"POP MIX", "Spotipis"};
     p2 = createElemenLP(Y);
     insertLastPlaylist(LP, p2);
-    Y = {"ThisisCharlie", "Charlie Puth"};
+    Y = {"This Is Charlie", "Charlie Puth"};
     p3 = createElemenLP(Y);
     insertLastPlaylist(LP, p3);
     Y = {"FOUR", "One Direction"};
     p4 = createElemenLP(Y);
     insertLastPlaylist(LP, p4);
+    Y = {"Chill Mix", "Spotipis"};
+    p5 = createElemenLP(Y);
+    insertLastPlaylist(LP, p5);
 
     L = searchLagu(LL, "Daylight", "Taylor Swift");
     insertLastRelation(p1->lagu, createElemenLR(L));
@@ -2837,7 +3166,7 @@ void DeveloperMode(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &
 
     L = searchLagu(LL, "Everyday", "Ariana Grande");
     insertLastRelation(p2->lagu, createElemenLR(L));
-    L = searchLagu(LL, "There's Nothing Holdin' Me Back", "Shawn Mendes");
+    L = searchLagu(LL, "Nothing Holdin me back", "Shawn Mendes");
     insertLastRelation(p2->lagu, createElemenLR(L));
     L = searchLagu(LL, "Beauty And A Beat", "Justin Bieber");
     insertLastRelation(p2->lagu, createElemenLR(L));
@@ -2874,4 +3203,14 @@ void DeveloperMode(listPlaylist &LP, listLagu &LL, ListRelation &LR, ListQueue &
     L = searchLagu(LL, "Spaces", "One Direction");
     insertLastRelation(p4->lagu, createElemenLR(L));
     p4->info.jumlahLagu = 6;
+
+    L = searchLagu(LL, "Beside You", "keshi");
+    insertLastRelation(p5->lagu, createElemenLR(L));
+    L = searchLagu(LL, "Old Love", "yuji");
+    insertLastRelation(p5->lagu, createElemenLR(L));
+    L = searchLagu(LL, "Best Part", "Daniel Caesar");
+    insertLastRelation(p5->lagu, createElemenLR(L));
+    L = searchLagu(LL, "Here With Me", "d4vd");
+    insertLastRelation(p5->lagu, createElemenLR(L));
+    p5->info.jumlahLagu = 4;
 }

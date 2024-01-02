@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <windows.h>
 #define info(P) (P)->info
 #define next(P) (P)->next
 #define prev(P) (P)->prev
@@ -118,12 +119,14 @@ void deleteLastLagu(listLagu &LL, adr_lagu &P);
 void deleteFirstRelation(ListRelation &LR, adr_relation &P);
 void deleteAfterRelation(ListRelation &LR, adr_relation Prec, adr_relation &P);
 void deleteLastRelation(ListRelation &LR, adr_relation &P);
+void deleteRelationByTitle(ListRelation &LR, string playlist, adr_relation &P);
 void showPlaylist(listPlaylist LP);
 void showListLagu(listLagu LL);
 void showAntrianLagu(ListQueue LQ);
 void showIsiPlaylist(listPlaylist LP, string Nama_Playlist);
 void showRelasiLagu(listPlaylist LL, string judul_lagu);
 void showSameTitle(listLagu LL, string judul_lagu);
+void showSameCreator(listPlaylist LP, string creatorName);
 int jumlahPlaylist(listPlaylist LP);
 int jumlahListLagu(listLagu LL);
 int jumlahAntrian(ListQueue LQ);
